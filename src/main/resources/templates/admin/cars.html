@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Машины</title>
+    <style>
+        body {
+          border: 5px solid green; /* Цветная рамка */
+          margin: 0; /* Убираем отступы по умолчанию */
+          padding: 20px; /* Добавляем внутренние отступы для контента */
+      }
+
+      table {
+      border-collapse: collapse; /* Убирает двойные линии между ячейками */
+          border: 2px solid black; /* Рамка вокруг всей таблицы */
+      }
+
+      th, td {
+          border: 1px solid black; /* Рамка вокруг каждой ячейки */
+          padding: 8px; /* Внутренние отступы для ячеек */
+          text-align: center; /* Выравнивание текста по центру */
+      }
+    </style>
+</head>
+
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>ID поставщика</th>
+        <th>ID транспортной компании</th>
+        <th>Модель</th>
+        <th>Цена</th>
+        <th>Год выпуска</th>
+        <th>Пробег</th>
+        <th>Цвет</th>
+    </tr>
+
+    <tr th:each="car : ${cars}">
+        <td th:text="${car.car_id}"></td>
+        <td th:text="${car.suppliers.supplier_id}"></td>
+        <td th:text="${car.transporationCompanies.transporation_id}"></td>
+        <td th:text="${car.model}"></td>
+        <td th:text="${car.cost}"></td>
+        <td th:text="${car.makeYear}"></td>
+        <td th:text="${car.mileage}"></td>
+        <td th:text="${car.color}"></td>
+        <td>
+            <a th:href="@{/admin/cars/delete/{id}(id=${car.car_id})}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<!--<div>-->
+<!--    <div>-->
+<!--        <h2>Топ-3 самых дорогих автомобилей</h2>-->
+<!--        <table id="expensiveCarsTable">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>ID</th>-->
+<!--                <th>ID поставщика</th>-->
+<!--                <th>ID транспортной компании</th>-->
+<!--                <th>Модель</th>-->
+<!--                <th>Цена</th>-->
+<!--                <th>Год выпуска</th>-->
+<!--                <th>Пробег</th>-->
+<!--                <th>Цвет</th>-->
+<!--                <th>Удален</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody id="expensiveCarsTableBody">-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+<!--    <div>-->
+<!--        <h2>Топ-3 самых бюджетных автомобилей</h2>-->
+<!--        <table id="cheapCarsTable">-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>ID</th>-->
+<!--                <th>ID поставщика</th>-->
+<!--                <th>ID транспортной компании</th>-->
+<!--                <th>Модель</th>-->
+<!--                <th>Цена</th>-->
+<!--                <th>Год выпуска</th>-->
+<!--                <th>Пробег</th>-->
+<!--                <th>Цвет</th>-->
+<!--                <th>Удален</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody id="cheapCarsTableBody">-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </div>-->
+<!--</div>-->
+
+
+<div id="addForm">
+    <h2>Добавьте новую модель автомобиля</h2>
+    <form>
+        <label for="addSupplierId">supplier_id:</label>
+        <input type="number" id="addSupplierId" required/><br><br>
+
+        <label for="addTransportationId">transporation_id:</label>
+        <input type="number" id="addTransportationId" required/><br><br>
+
+        <label for="addModel">Модель:</label>
+        <input type="text" id="addModel" required/><br><br>
+
+        <label for="addCost">Цена:</label>
+        <input type="number" id="addCost" required/><br><br>
+
+        <label for="addMakeYear">Год производства:</label>
+        <input type="number" id="addMakeYear" required/><br><br>
+
+        <label for="addMileage">Пробег:</label>
+        <input type="number" id="addMileage" required/><br><br>
+
+        <label for="addColor">Цвет:</label>
+        <input type="text" id="addColor" required/><br><br>
+
+        <button type="submit">Добавить</button>
+    </form>
+</div>
+
+<div class="edit-form" >
+    <h2>Редактировать автомобиль</h2>
+    <form id="editForm" >
+
+        <label for="car_id">car_id:</label>
+        <input type="number" id="car_id" required/><br><br>
+
+        <label for="addSupplierId">supplier_id:</label>
+        <input type="number" id="editSupplierId" required/><br><br>
+
+        <label for="editTransportationId">transporation_id:</label>
+        <input type="number" id="editTransportationId" required/><br><br>
+
+        <label for="editModel">Модель:</label>
+        <input type="text" id="editModel" required/><br><br>
+
+        <label for="editCost">Цена:</label>
+        <input type="number" id="editCost" required/><br><br>
+
+        <label for="editMakeYear">Год производства:</label>
+        <input type="number" id="editMakeYear" required/><br><br>
+
+        <label for="editMileage">Пробег:</label>
+        <input type="number" id="editMileage" required/><br><br>
+
+        <label for="editColor">Цвет:</label>
+        <input type="text" id="editColor" required/><br><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+       event.preventDefault();
+
+       const transporation_id = document.getElementById('addTransportationId').value;
+       const supplier_id = document.getElementById('addSupplierId').value;
+
+       const newCar = {
+           model: document.getElementById('addModel').value,
+           cost: document.getElementById('addCost').value,
+           makeYear: document.getElementById('addMakeYear').value,
+           mileage: document.getElementById('addMileage').value,
+           color: document.getElementById('addColor').value,
+       };
+
+        newCar.transporationCompanies = {transporation_id: parseInt(transporation_id)}
+        newCar.suppliers = {supplier_id : parseInt(supplier_id)}
+
+       fetch('/admin/cars', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(newCar),
+       })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`HTTP error! status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(data => {
+               alert(data.message);
+               location.reload();
+           })
+           .catch(error => {
+               console.error('Ошибка', error);
+               location.reload();
+           });
+   });
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+     const carId = document.getElementById('car_id').value;
+     const transporation_id = document.getElementById('editTransportationId').value;
+     const supplier_id = document.getElementById('editSupplierId').value;
+
+    const updatedCar = {
+        model: document.getElementById('editModel').value,
+        cost: document.getElementById('editCost').value,
+        makeYear: document.getElementById('editMakeYear').value,
+        mileage: document.getElementById('editMileage').value,
+        color: document.getElementById('editColor').value,
+    };
+
+    updatedCar.transporationCompanies = {transporation_id: parseInt(transporation_id)}
+    updatedCar.suppliers = {supplier_id : parseInt(supplier_id)}
+
+    fetch(`/admin/cars/${carId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedCar),
+    })
+
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload();
+     })
+    .catch(error => {
+<!--        console.error('Ошибка редактирования автомобиля:', error);-->
+<!--        alert('Автомобиль отредактирован');-->
+        location.reload();
+    });
+});
+
+</script>
+</body>
+</html>

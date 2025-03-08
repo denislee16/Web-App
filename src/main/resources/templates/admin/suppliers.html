@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Поставщики</title>
+    <style>
+        body {
+          border: 5px solid green; /* Цветная рамка */
+          margin: 0; /* Убираем отступы по умолчанию */
+          padding: 20px; /* Добавляем внутренние отступы для контента */
+      }
+
+      table {
+      border-collapse: collapse; /* Убирает двойные линии между ячейками */
+          border: 2px solid black; /* Рамка вокруг всей таблицы */
+      }
+
+      th, td {
+          border: 1px solid black; /* Рамка вокруг каждой ячейки */
+          padding: 8px; /* Внутренние отступы для ячеек */
+          text-align: center; /* Выравнивание текста по центру */
+      }
+    </style>
+</head>
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Название</th>
+        <th>Адрес</th>
+        <th>Номер телефона</th>
+    </tr>
+    <tr th:each="supplier : ${suppliers}">
+        <td th:text="${supplier.supplier_id}"></td>
+        <td th:text="${supplier.name}"></td>
+        <td th:text="${supplier.address}"></td>
+        <td th:text="${supplier.number}"></td>
+        <td>
+            <a th:href="@{/admin/suppliers/delete/{id}(id=${supplier.supplier_id})}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<div id="addForm">
+    <h2>Добавьте нового поставщика</h2>
+    <form>
+
+<!--        <label for="supplier_id">ID:</label>-->
+<!--        <input type="number" id="supplier_id" name="supplier_id"><br><br>-->
+
+        <label for="addName">Название:</label>
+        <input type="text" id="addName" required/><br><br>
+
+        <label for="addAddress">Адрес:</label>
+        <input type="text" id="addAddress" required/><br><br>
+
+        <label for="addNumber">Номер телефона:</label>
+        <input type="text" id="addNumber" required/><br><br>
+
+        <button type="submit"> Добавить нового поставщика </button>
+    </form>
+</div>
+
+<div class="edit-form" >
+    <h2>Редактировать поставщика</h2>
+    <form id="editForm" >
+        <label for="supplier_id">ID:</label>
+        <input type="number" id="supplier_id" required/><br><br>
+
+        <label for="editName">Название:</label>
+        <input type="text" id="editName" required/><br><br>
+
+        <label for="editAddress">Адрес:</label>
+        <input type="text" id="editAddress" required/><br><br>
+
+        <label for="editNumber">Номер телефона:</label>
+        <input type="text" id="editNumber" required/><br><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+       event.preventDefault();
+
+       const newSupplier = {
+           name: document.getElementById('addName').value,
+           address: document.getElementById('addAddress').value,
+           number: document.getElementById('addNumber').value,
+       };
+
+       fetch('/admin/suppliers', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(newSupplier),
+       })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`HTTP error! status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(data => {
+               alert(data.message);
+               location.reload();
+           })
+           .catch(error => {
+               console.error('Ошибка', error);
+               location.reload();
+           });
+   });
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const supplier_id = document.getElementById('supplier_id').value;
+
+    const updatedSupplier = {
+         name: document.getElementById('editName').value,
+         number: document.getElementById('editNumber').value,
+         address: document.getElementById('editAddress').value,
+    };
+
+    fetch(`/admin/suppliers/${supplier_id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedSupplier),
+    })
+
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload();
+     })
+    .catch(error => {
+<!--        console.error('Ошибка редактирования:', error);-->
+<!--        alert('Объект отредактирован');-->
+        location.reload();
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Услуги</title>
+    <style>
+        body {
+          border: 5px solid green; /* Цветная рамка */
+          margin: 0; /* Убираем отступы по умолчанию */
+          padding: 20px; /* Добавляем внутренние отступы для контента */
+      }
+
+      table {
+      border-collapse: collapse; /* Убирает двойные линии между ячейками */
+          border: 2px solid black; /* Рамка вокруг всей таблицы */
+      }
+
+      th, td {
+          border: 1px solid black; /* Рамка вокруг каждой ячейки */
+          padding: 8px; /* Внутренние отступы для ячеек */
+          text-align: center; /* Выравнивание текста по центру */
+      }
+    </style>
+</head>
+
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>ID услуги из каталога</th>
+        <th>Дата</th>
+    </tr>
+    <tr th:each="service : ${services}">
+        <td th:text="${service.service_id}"></td>
+        <td th:text="${service.catalogOfService.catalog_id}"></td>
+        <td th:text="${service.date}"></td>
+        <td>
+            <a th:href="@{/admin/service/delete/{id}(id=${service.service_id})}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<div id="addForm">
+    <h2>Добавьте новую услугу</h2>
+    <form>
+        <!--        <label for="service_id">ID:</label>-->
+        <!--        <input type="number" id="service_id" required/><br><br>-->
+
+        <label for="addCatalog_id">ID услуги из каталога:</label>
+        <input type="number" id="addCatalog_id" required/><br><br>
+
+        <label for="addDate">Дата:</label>
+        <input type="date" id="addDate" required/><br><br>
+
+        <input type="submit" value="Добавить новую услугу">
+    </form>
+</div>
+
+<div class="edit-form">
+    <h2>Редактировать услугу</h2>
+    <form id="editForm">
+
+        <label for="service_id">ID:</label>
+        <input type="number" id="service_id" required/><br><br>
+
+        <label for="editCatalog_id">ID услуги из каталога:</label>
+        <input type="number" id="editCatalog_id" required/><br><br>
+
+        <label for="editDate">Дата:</label>
+        <input type="date" id="editDate" required/><br><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+       event.preventDefault();
+
+       const catalog_id = document.getElementById('addCatalog_id').value;
+
+       const newCatalog = {
+           date: document.getElementById('addDate').value,
+       };
+
+        newCatalog.catalogOfService = {catalog_id: parseInt(catalog_id)}
+
+       fetch('/admin/service', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(newCatalog),
+       })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`HTTP error! status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(data => {
+               alert(data.message);
+               location.reload();
+           })
+           .catch(error => {
+               console.error('Ошибка', error);
+               location.reload();
+           });
+   });
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const service_id = document.getElementById('service_id').value;
+    const catalog_id = document.getElementById('editCatalog_id').value;
+
+    const updatedCatalog = {
+         date: document.getElementById('editDate').value,
+    };
+
+    updatedCatalog.catalogOfService = {catalog_id: parseInt(catalog_id)}
+
+    fetch(`/admin/service/${service_id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedCatalog),
+    })
+
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload();
+     })
+    .catch(error => {
+<!--        console.error('Ошибка редактирования автомобиля:', error);-->
+<!--        alert('Автомобиль отредактирован');-->
+        location.reload();
+    });
+});
+
+</script>
+
+</body>
+</html>

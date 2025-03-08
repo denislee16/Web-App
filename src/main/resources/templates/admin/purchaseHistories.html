@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Журнал покупок</title>
+    <style>
+        body {
+          border: 5px solid green; /* Цветная рамка */
+          margin: 0; /* Убираем отступы по умолчанию */
+          padding: 20px; /* Добавляем внутренние отступы для контента */
+      }
+
+      table {
+      border-collapse: collapse; /* Убирает двойные линии между ячейками */
+          border: 2px solid black; /* Рамка вокруг всей таблицы */
+      }
+
+      th, td {
+          border: 1px solid black; /* Рамка вокруг каждой ячейки */
+          padding: 8px; /* Внутренние отступы для ячеек */
+          text-align: center; /* Выравнивание текста по центру */
+      }
+    </style>
+</head>
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>ID клиента</th>
+        <th>ID работника</th>
+        <th>ID автомобиля</th>
+        <th>ID услуги</th>
+        <th>Дата</th>
+        <th>Общая стоимость</th>
+    </tr>
+    <tr th:each="purchaseHistory : ${purchaseHistories}">
+        <td th:text="${purchaseHistory.purchase_id}"></td>
+        <td th:text="${purchaseHistory.clients.client_id}"></td>
+        <td th:text="${purchaseHistory.workers.worker_id}"></td>
+        <td th:text="${purchaseHistory.cars.car_id}"></td>
+        <td th:text="${purchaseHistory.service.service_id}"></td>
+        <td th:text="${#dates.format(purchaseHistory.date, 'dd-MM-yyyy')}"></td>
+        <td th:text="${purchaseHistory.totalCost}"></td>
+        <td>
+            <a th:href="@{/admin/purchase_histories/delete/{id}(id=${purchaseHistory.purchase_id})}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<div id="addForm">
+    <h2>Добавьте новую покупку</h2>
+    <form>
+
+        <!--        <label for="addPurchase_id">ID:</label>-->
+        <!--        <input type="number" id="addPurchase_id" required/><br><br>-->
+
+        <label for="addClient_id">ID клиента:</label>
+        <input type="number" id="addClient_id" required/><br><br>
+
+        <label for="addWorker_id">ID работника:</label>
+        <input type="number" id="addWorker_id" required/><br><br>
+
+        <label for="addCar_id">ID автомобиля:</label>
+        <input type="number" id="addCar_id" required/><br><br>
+
+        <label for="addService_id">ID услуги:</label>
+        <input type="number" id="addService_id" required/><br><br>
+
+        <label for="addDate">Дата:</label>
+        <input type="date" id="addDate" required/><br><br>
+
+        <label for="addTotalCost">Общая стоимость:</label>
+        <input type="number" id="addTotalCost" required/><br><br>
+
+        <button type="submit">Добавить покупку</button>
+    </form>
+</div>
+
+<div class="edit-form">
+    <h2>Редактировать покупку</h2>
+    <form id="editForm">
+
+        <label for="purchase_id">ID:</label>
+        <input type="number" id="purchase_id" required/><br><br>
+
+        <label for="editClient_id">ID клиента:</label>
+        <input type="number" id="editClient_id" required/><br><br>
+
+        <label for="editWorker_id">ID работника:</label>
+        <input type="number" id="editWorker_id" required/><br><br>
+
+<!--        <label for="editCar_id">ID автомобиля:</label>-->
+<!--        <input type="number" id="editCar_id" required/><br><br>-->
+
+<!--        <label for="editService_id">ID услуги:</label>-->
+<!--        <input type="number" id="editService_id" required/><br><br>-->
+
+        <label for="editDate">Дата:</label>
+        <input type="date" id="editDate" required/><br><br>
+
+        <label for="editTotalCost">Общая стоимость:</label>
+        <input type="number" id="editTotalCost" required/><br><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+       event.preventDefault();
+
+       const client_id = document.getElementById('addClient_id').value;
+       const worker_id = document.getElementById('addWorker_id').value;
+       const car_id = document.getElementById('addCar_id').value;
+       const service_id = document.getElementById('addService_id').value;
+
+       const newPurchase = {
+           date: document.getElementById('addDate').value,
+           totalCost: document.getElementById('addTotalCost').value,
+       };
+
+        newPurchase.clients = {client_id: parseInt(client_id)}
+        newPurchase.workers = {worker_id : parseInt(worker_id)}
+        newPurchase.cars = {car_id : parseInt(car_id)}
+        newPurchase.service = {service_id : parseInt(service_id)}
+
+       fetch('/admin/purchase_histories', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(newPurchase),
+       })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`HTTP error! status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(data => {
+               alert(data.message);
+               location.reload();
+           })
+           .catch(error => {
+               console.error('Ошибка', error);
+               location.reload();
+           });
+   });
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+     const purchase_id = document.getElementById('purchase_id').value;
+     const client_id = document.getElementById('editClient_id').value;
+       const worker_id = document.getElementById('editWorker_id').value;
+<!--       const car_id = document.getElementById('editCar_id').value;-->
+<!--       const service_id = document.getElementById('editService_id').value;-->
+
+    const updatedPurchase = {
+         date: document.getElementById('editDate').value,
+           totalCost: document.getElementById('editTotalCost').value,
+    };
+
+    updatedPurchase.clients = {client_id: parseInt(client_id)}
+    updatedPurchase.workers = {worker_id : parseInt(worker_id)}
+<!--    updatedPurchase.cars = {car_id : parseInt(car_id)}-->
+<!--    updatedPurchase.service = {service_id : parseInt(service_id)}-->
+
+    fetch(`/admin/purchase_histories/${purchase_id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedPurchase),
+    })
+
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload();
+     })
+    .catch(error => {
+<!--        console.error('Ошибка редактирования автомобиля:', error);-->
+<!--        alert('Автомобиль отредактирован');-->
+        location.reload();
+    });
+});
+
+</script>
+
+</body>
+</html>

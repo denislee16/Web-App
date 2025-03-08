@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Работники</title>
+    <style>
+        body {
+          border: 5px solid green; /* Цветная рамка */
+          margin: 0; /* Убираем отступы по умолчанию */
+          padding: 20px; /* Добавляем внутренние отступы для контента */
+      }
+
+      table {
+      border-collapse: collapse; /* Убирает двойные линии между ячейками */
+          border: 2px solid black; /* Рамка вокруг всей таблицы */
+      }
+
+      th, td {
+          border: 1px solid black; /* Рамка вокруг каждой ячейки */
+          padding: 8px; /* Внутренние отступы для ячеек */
+          text-align: center; /* Выравнивание текста по центру */
+      }
+    </style>
+</head>
+<body>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>ФИО</th>
+        <th>Должность</th>
+        <th>Опыт работы</th>
+        <th>Заработная плата</th>
+        <th>Номер телефона</th>
+    </tr>
+    <tr th:each="worker : ${workers}">
+        <td th:text="${worker.worker_id}"></td>
+        <td th:text="${worker.name}"></td>
+        <td th:text="${worker.post}"></td>
+        <td th:text="${worker.experience}"></td>
+        <td th:text="${worker.wages}"></td>
+        <td th:text="${worker.number}"></td>
+        <td>
+            <a th:href="@{/admin/workers/delete/{id}(id=${worker.worker_id})}">Delete</a>
+        </td>
+    </tr>
+</table>
+
+<div id="addForm">
+    <h2>Добавьте нового работника</h2>
+    <form>
+
+<!--        <label for="worker_id">ID:</label>-->
+<!--        <input type="number" id="worker_id" name="worker_id"><br><br>-->
+
+        <label for="addName">ФИО:</label>
+        <input type="text" id="addName" required/><br><br>
+
+        <label for="addPost">Должность:</label>
+        <input type="text" id="addPost" required/><br><br>
+
+        <label for="addExperience">Опыт работы:</label>
+        <input type="text" id="addExperience" required/><br><br>
+
+        <label for="addWages">Заработная плата:</label>
+        <input type="number" id="addWages" required/><br><br>
+
+        <label for="addNumber">Номер телефона:</label>
+        <input type="text" id="addNumber" required/><br><br>
+
+        <input type="submit" value="Добавить работника">
+    </form>
+</div>
+
+<div class="edit-form" >
+    <h2>Редактировать работника</h2>
+    <form id="editForm" >
+        <label for="worker_id">ID:</label>
+        <input type="number" id="worker_id" required/><br><br>
+
+        <label for="editName">ФИО:</label>
+        <input type="text" id="editName" required/><br><br>
+
+        <label for="editPost">Должность:</label>
+        <input type="text" id="editPost" required/><br><br>
+
+        <label for="editExperience">Опыт работы:</label>
+        <input type="text" id="editExperience" required/><br><br>
+
+        <label for="editWages">Заработная плата:</label>
+        <input type="number" id="editWages" required/><br><br>
+
+        <label for="editNumber">Номер телефона:</label>
+        <input type="text" id="editNumber" required/><br><br>
+
+        <button type="submit">Сохранить</button>
+    </form>
+</div>
+
+<script>
+    document.getElementById('addForm').addEventListener('submit', function (event) {
+       event.preventDefault();
+
+       const newWorker = {
+           name: document.getElementById('addName').value,
+           post: document.getElementById('addPost').value,
+           experience: document.getElementById('addExperience').value,
+           wages: document.getElementById('addWages').value,
+           number: document.getElementById('addNumber').value,
+       };
+
+       fetch('/admin/workers', {
+           method: 'POST',
+           headers: {
+               'Content-Type': 'application/json',
+           },
+           body: JSON.stringify(newWorker),
+       })
+           .then(response => {
+               if (!response.ok) {
+                   throw new Error(`HTTP error! status: ${response.status}`);
+               }
+               return response.json();
+           })
+           .then(data => {
+               alert(data.message);
+               location.reload();
+           })
+           .catch(error => {
+               console.error('Ошибка', error);
+               location.reload();
+           });
+   });
+
+document.getElementById('editForm').addEventListener('submit', function (event) {
+    event.preventDefault();
+
+    const worker_id = document.getElementById('worker_id').value;
+
+    const updatedWorker = {
+         name: document.getElementById('editName').value,
+         post: document.getElementById('editPost').value,
+         experience: document.getElementById('editExperience').value,
+         wages: document.getElementById('editWages').value,
+         number: document.getElementById('editNumber').value,
+    };
+
+    fetch(`/admin/workers/${worker_id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedWorker),
+    })
+
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        alert(data.message);
+        location.reload();
+     })
+    .catch(error => {
+<!--        console.error('Ошибка редактирования:', error);-->
+<!--        alert('Объект отредактирован');-->
+        location.reload();
+    });
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Услуги</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .services-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+             flex-direction: column;
+             align-items: center;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+             background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+             text-decoration: none;
+        }
+
+        #servicesList {
+            list-style: none;
+            padding: 0;
+            width: 80%;
+        }
+        #servicesList li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+         #servicesList li:last-child {
+             border-bottom: none;
+         }
+
+        #servicesList li label {
+            margin-left: 10px;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+        #servicesList li input[type="checkbox"] {
+            margin-right: 10px;
+             cursor: pointer;
+        }
+
+        #servicesList li div {
+            margin-left: 20px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+         .controls {
+            display: flex;
+            align-items: center;
+             gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls input[type="text"],
+        .controls input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .controls button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:hover{
+            background-color: #4cae4c;
+        }
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+           margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+          a {
+             background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+             text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        a:hover {
+             background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="services-container">
+<!--    <a href="/" class="home-button">На главную</a>-->
+    <h2>Наши услуги</h2>
+    <div class="controls"></div>
+    <ul id="servicesList"></ul>
+    <button onclick="addToCart()">Добавить в корзину</button>
+</div>
+
+
+<script>
+    fetch('/catalogOfService-user/list')
+     .then(response => response.json())
+  .then(catalogOfServices => {
+    const servicesList = document.getElementById('servicesList');
+    let allCatalogOfServices = catalogOfServices; // Сохраняем все услуги для фильтрации
+    displayServices(catalogOfServices); // Первоначальный вывод услуг
+
+    const controlsContainer = document.querySelector('.controls');
+
+    const searchInput = document.createElement('input');
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Поиск по названию';
+
+    const searchButton = document.createElement('button');
+    searchButton.textContent = 'Поиск';
+    searchButton.addEventListener('click', () => filterServices());
+
+    const priceFilter = document.createElement('input');
+    priceFilter.type = 'number';
+    priceFilter.placeholder = 'Фильтр по цене (максимальная)';
+
+    const priceFilterButton = document.createElement('button');
+    priceFilterButton.textContent = 'Фильтр';
+    priceFilterButton.addEventListener('click', () => filterServices());
+
+    controlsContainer.appendChild(searchInput);
+    controlsContainer.appendChild(searchButton);
+    controlsContainer.appendChild(priceFilter);
+    controlsContainer.appendChild(priceFilterButton);
+
+    function filterServices() {
+      const searchTerm = searchInput.value.toLowerCase();
+      const maxPrice = parseInt(priceFilter.value) || Infinity;
+
+      const filteredCatalogOfServices = allCatalogOfServices.filter(catalogOfService =>
+        catalogOfService.name.toLowerCase().includes(searchTerm) && catalogOfService.cost <= maxPrice
+      );
+      displayServices(filteredCatalogOfServices);
+    }
+
+    function displayServices(catalogOfServices) {
+      servicesList.innerHTML = ''; // Очищаем список перед обновлением
+      catalogOfServices.forEach(catalogOfService => {
+        const listItem = document.createElement('li');
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.id = `service-${catalogOfService.catalog_id}`;
+        checkbox.value = catalogOfService.name;
+        checkbox.addEventListener('change', () => toggleDescription(catalogOfService, checkbox));
+
+        const label = document.createElement('label');
+        label.htmlFor = `service-${catalogOfService.catalog_id}`;
+        label.textContent = `${catalogOfService.name} - ${catalogOfService.cost} руб.`;
+
+        const descriptionDiv = document.createElement('div');
+        descriptionDiv.id = `description-${catalogOfService.catalog_id}`;
+        descriptionDiv.style.display = 'none';
+
+        listItem.appendChild(checkbox);
+        listItem.appendChild(label);
+        listItem.appendChild(descriptionDiv);
+        servicesList.appendChild(listItem);
+      });
+    }
+  })
+  .catch(error => {
+    console.error('Ошибка загрузки услуг:', error);
+    alert('Ошибка загрузки услуг. Пожалуйста, попробуйте позже.');
+  });
+
+function toggleDescription(catalogOfService, checkbox) {
+  const descriptionDiv = document.getElementById(`description-${catalogOfService.catalog_id}`);
+  if (checkbox.checked) {
+<!--    descriptionDiv.textContent = catalogOfService.description || "Описание недоступно";-->
+    descriptionDiv.style.display = 'block';
+  } else {
+    descriptionDiv.style.display = 'none';
+  }
+}
+
+function addToCart() {
+  const checkedServices = [];
+  const checkboxes = document.querySelectorAll('#servicesList input[type="checkbox"]:checked');
+
+  checkboxes.forEach(checkbox => {
+    const serviceId = parseInt(checkbox.id.split('-')[1]); //Извлекаем id услуги из id checkbox'a
+    checkedServices.push({ id: serviceId, quantity: 1, isService: true }); // Добавлено quantity
+  });
+
+  if (checkedServices.length === 0) {
+    alert("Пожалуйста, выберите хотя бы одну услугу");
+    return;
+  }
+
+  fetch('/addToCart', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(checkedServices)
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    alert(data.message || "Услуги успешно добавлены в корзину!");
+  })
+  .catch(error => {
+    console.error('Ошибка добавления в корзину:', error);
+    alert('Ошибка добавления в корзину. Пожалуйста, попробуйте позже.');
+  });
+}
+</script>
+</body>
+</html>
+

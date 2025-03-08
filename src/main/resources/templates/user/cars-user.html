@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Автомобили</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .cars-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+<!--        .home-button {-->
+<!--            background-color: #007bff;-->
+<!--            color: white;-->
+<!--            padding: 10px 15px;-->
+<!--            border: none;-->
+<!--            border-radius: 4px;-->
+<!--            cursor: pointer;-->
+<!--            transition: background-color 0.3s;-->
+<!--            text-decoration: none;-->
+<!--            display: inline-block;-->
+<!--            margin-top: 20px;-->
+<!--        }-->
+
+<!--        .home-button:hover {-->
+<!--            background-color: #0056b3;-->
+<!--        }-->
+
+            .home-button {
+            color: black; /* Черный цвет текста */
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+<!--            cursor: pointer;-->
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        #carsList {
+            list-style: none;
+            padding: 0;
+            width: 80%;
+        }
+
+        #carsList li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+        }
+
+        #carsList li:last-child {
+            border-bottom: none;
+        }
+
+        #carsList li label {
+            margin-left: 10px;
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        #carsList li input[type="checkbox"] {
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        #carsList li div {
+            margin-left: 20px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .controls input[type="text"],
+        .controls input[type="number"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+
+        .controls button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .controls button:hover {
+            background-color: #4cae4c;
+        }
+
+        button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin-right: 10px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+
+        a {
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+
+        a:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<div class="cars-container">
+    <h2>Автомобили</h2>
+    <div class="controls"></div>
+    <ul id="carsList"></ul>
+    <button onclick="addToCart()">Добавить в корзину</button>
+    <!--    <a href="/cart">Перейти в корзину</a>-->
+</div>
+<!--<a href="/" class="home-button">На главную</a>-->
+
+<script>
+    fetch('/cars-user/list')
+        .then(response => response.json())
+        .then(cars => {
+            const carsList = document.getElementById('carsList');
+            let allCars = cars; // Сохраняем все автомобили для фильтрации
+            displayCars(cars); // Первоначальный вывод автомобилей
+
+            const controlsContainer = document.querySelector('.controls');
+
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.placeholder = 'Поиск по модели';
+
+            const searchButton = document.createElement('button');
+            searchButton.textContent = 'Поиск';
+            searchButton.addEventListener('click', () => filterCars());
+
+            const priceFilter = document.createElement('input');
+            priceFilter.type = 'number';
+            priceFilter.placeholder = 'Фильтр по цене';
+
+            const priceFilterButton = document.createElement('button');
+            priceFilterButton.textContent = 'Фильтр';
+            priceFilterButton.addEventListener('click', () => filterCars());
+
+            controlsContainer.appendChild(searchInput);
+            controlsContainer.appendChild(searchButton);
+            controlsContainer.appendChild(priceFilter);
+            controlsContainer.appendChild(priceFilterButton);
+
+            function filterCars() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const maxPrice = parseInt(priceFilter.value) || Infinity;
+
+                const filteredCars = allCars.filter(car =>
+                    car.model.toLowerCase().includes(searchTerm) && car.cost <= maxPrice
+                );
+                displayCars(filteredCars);
+            }
+
+            function displayCars(cars) {
+                carsList.innerHTML = ''; // Очищаем список перед обновлением
+                cars.forEach(car => {
+                    if(car.cost > 0) {
+                        const listItem = document.createElement('li');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `car-${car.car_id}`;
+                        checkbox.value = car.model;
+                        checkbox.addEventListener('change', () => toggleDescription(car, checkbox));
+
+                        const label = document.createElement('label');
+                        label.htmlFor = `car-${car.car_id}`;
+                        label.textContent = `${car.model} - ${car.cost} руб.`;
+
+                        const descriptionDiv = document.createElement('div');
+                        descriptionDiv.id = `description-${car.car_id}`;
+                        descriptionDiv.style.display = 'none';
+
+                        listItem.appendChild(checkbox);
+                        listItem.appendChild(label);
+                        listItem.appendChild(descriptionDiv);
+                        carsList.appendChild(listItem);
+                    }
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки автомобилей:', error);
+            alert('Ошибка загрузки автомобилей. Пожалуйста, попробуйте позже.');
+        });
+
+    function toggleDescription(car, checkbox) {
+        const descriptionDiv = document.getElementById(`description-${car.car_id}`);
+        if (checkbox.checked) {
+            descriptionDiv.textContent = `Год выпуска: ${car.makeYear}, Пробег: ${car.mileage}, Цвет: ${car.color}`;
+            descriptionDiv.style.display = 'block';
+        } else {
+            descriptionDiv.style.display = 'none';
+        }
+    }
+
+    function addToCart() {
+        const checkedCars = [];
+        const checkboxes = document.querySelectorAll('#carsList input[type="checkbox"]:checked');
+
+        checkboxes.forEach(checkbox => {
+            const carId = parseInt(checkbox.id.split('-')[1]); // Извлекаем id автомобиля из id checkbox'a
+            checkedCars.push({ id: carId, quantity: 1 }); // Добавлено quantity
+        });
+
+        if (checkedCars.length === 0) {
+            alert("Пожалуйста, выберите хотя бы одну машину");
+            return;
+        }
+
+        fetch('/addToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(checkedCars)
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            alert(data.message || "Автомобили успешно добавлены в корзину!");
+        })
+        .catch(error => {
+            console.error('Ошибка добавления в корзину:', error);
+            alert('Ошибка добавления в корзину. Пожалуйста, попробуйте позже.');
+        });
+    }
+</script>
+</body>
+</html>

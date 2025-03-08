@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Корзина</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .cart-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            margin: 0 auto;
+        }
+
+        .home-button {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        #cartList {
+            list-style: none;
+            padding: 0;
+        }
+
+        #cartList li {
+            padding: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px solid #eee;
+        }
+         #cartList li:last-child {
+             border-bottom: none;
+         }
+
+        p {
+            margin-top: 20px;
+             text-align: right;
+        }
+        #totalSum {
+             font-weight: bold;
+            color: #333;
+        }
+
+          button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+             margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #4cae4c;
+        }
+        #carSelect {
+             margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: calc(100% - 18px); /* Уменьшено на border и padding */
+         }
+        .select-car-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .select-car-container label {
+          text-align: center;
+             margin-bottom: 5px;
+         }
+    </style>
+</head>
+<body>
+<div class="cart-container">
+<!--    <a href="/index" class="home-button">На главную</a>-->
+    <h2>Корзина</h2>
+    <!--    <div class="select-car-container">-->
+    <!--        <label for="carSelect">Выберите автомобиль:</label>-->
+    <!--        <select id="carSelect"></select>-->
+    <!--    </div>-->
+    <ul id="cartList"></ul>
+    <p>Итоговая сумма: <span id="totalSum">0</span> руб.</p>
+    <button onclick="placeOrder()">Оформить заказ</button>
+</div>
+
+<script>
+    let client_id;
+    document.addEventListener('DOMContentLoaded', function() {
+        fetch('/profile/clients')
+            .then(response => response.json())
+            .then(client => {
+                client_id = client.client_id;
+            });
+
+       fetch('/cart/list')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+            }
+            return response.json();
+        })
+        .then(cart => {
+            const cartList = document.getElementById('cartList');
+            cartList.innerHTML = '';
+            let totalSum = 0;
+
+
+        cart.forEach(item => {
+             const listItem = document.createElement('li');
+             listItem.textContent = `${item.name} - ${item.price} руб. x ${item.quantity}`;
+             cartList.appendChild(listItem);
+             totalSum += item.price * item.quantity;
+
+        });
+
+            document.getElementById('totalSum').textContent = totalSum;
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки корзины:', error);
+            alert(`Ошибка загрузки корзины: ${error.message}`);
+        });
+    });
+
+
+   async function placeOrder() {
+        try {
+            const response = await fetch('/cart/placeOrder', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+               body: JSON.stringify({ client_id: client_id})
+
+            });
+           if (!response.ok) {
+              throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`);
+           }
+            const data = await response.json();
+            alert(data.message);
+            location.reload();
+        } catch (error) {
+            console.error('Ошибка при оформлении заказа:', error);
+           alert(`Ошибка при оформлении заказа: ${error.message}`);
+        }
+    }
+</script>
+</body>
+</html>

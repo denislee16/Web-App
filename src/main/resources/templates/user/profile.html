@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Profile</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+
+        .profile-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        .profile-container h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .profile-container p {
+            margin-bottom: 10px;
+            text-align: left;
+        }
+
+        .profile-container b {
+            font-weight: bold;
+            color: #555;
+        }
+
+        .order-list {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .order-list th, .order-list td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        .order-list th {
+            background-color: #f2f2f2;
+        }
+
+        .profile-container form {
+            display: flex;
+            text-align: center;
+            flex-direction: column;
+        }
+
+        .profile-container input[type="submit"] {
+            background-color: #d9534f;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .profile-container input[type="submit"]:hover {
+            background-color: #c9302c;
+        }
+
+        .home-button {
+            top: 10px;
+            left: 10px;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-decoration: none;
+        }
+
+        .purchase-histories-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<div class="profile-container">
+    <h1>Профиль</h1>
+    <p><b>ФИО:</b> <span th:text="${client.name}"></span></p>
+    <p><b>Email:</b> <span th:text="${client.email}"></span></p>
+    <p><b>Номер телефона:</b> <span th:text="${client.number}"></span></p>
+
+    <!--    <h2 class="purchase-histories-title">Мои заказы</h2>-->
+    <!--    <table class="order-list">-->
+    <!--        <thead>-->
+    <!--        <tr>-->
+    <!--            <th>Дата заказа</th>-->
+    <!--            <th>Автомобиль</th>-->
+    <!--            <th>Услуги</th>-->
+    <!--            <th>Сумма</th>-->
+    <!--        </tr>-->
+    <!--        </thead>-->
+    <!--        <tbody id="orderTableBody">-->
+
+    <!--        </tbody>-->
+    <!--    </table>-->
+
+
+    <a href="/" class="home-button">На главную</a>
+</div>
+
+<!--<script>-->
+<!--    const orderTableBody = document.getElementById('orderTableBody');-->
+
+<!--    document.addEventListener('DOMContentLoaded', function() {-->
+<!--        fetch('/profile/orders')-->
+<!--            .then(response => response.json())-->
+<!--            .then(orders => {-->
+<!--                orders.forEach(order => {-->
+<!--                    const row = document.createElement('tr');-->
+<!--                    row.innerHTML = `-->
+<!--                        <td>${new Date(order.order_date).toLocaleDateString()}</td>-->
+<!--                        <td>${order.car.brand} ${order.car.model}</td>-->
+<!--                        <td>${order.services.map(service => service.name).join(', ')}</td>-->
+<!--                        <td>${order.total}</td>-->
+<!--                    `;-->
+<!--                    orderTableBody.appendChild(row);-->
+<!--                });-->
+<!--            });-->
+<!--    });-->
+<!--</script>-->
+</body>
+</html>
